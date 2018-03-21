@@ -4,8 +4,6 @@ author: "Your Name Here"
 date: "October 31, 2017"
 output: html_document
 ---
-
-
 ## Loading the data
 
 ```{r, include=FALSE}
@@ -17,11 +15,39 @@ load("contributions.rda")
 ```
 
 ```{r}
-# Join the contributions and candidates tables by cand_id
-contributions_per_party <- contributions %>% 
+# join the contributions and candidates tables by cand_id
+contributions_2012 <- contributions %>% 
   inner_join(candidates, by = "cand_id") %>%
-  filter(cand_election_yr == 2011 | cand_election_yr == 2012) %>%
-  select(cand_party_affiliation, cand_id, transaction_amt)
+  filter(cand_election_yr == 2012) %>% # filter only elections in 2012
+  filter(transaction_type == "24E") %>% # filter only advocating donations
+  select(cand_party_affiliation, cand_id, transaction_amt, other_id) %>%
+  group_by(cand_id) %>%
+  summarize(N = n(),
+            total_amt_per_can = sum(transaction_amt))
+nrow(contributions_2012)
+```
+
+```{r}
+# join contributions_2012 and house_elections tables by fec_id = cand_id
+contributions_2012 <- contributions_2012 %>%
+  inner_join(house_elections, by = c("cand_id" = "fec_id"))
+nrow(contributions_2012)
+```
+
+```{r}
+# because one candidate can receive multiple donations
+# but only has one number of votes
+# so we group by cand_id to find the total amount of money one candidate received
+contributions_2012_per_party <- contributions_2012 %>%
+  group_by(party) %>%
+  summarize(num_can = n(),
+            total_amt = sum(total_amt_per_can),
+            mean_amt = mean(total_amt_per_can),
+            total_votes = sum(general_votes), 
+            mean_votes = mean(general_votes),
+            num_win = sum(ifelse(ge_winner == "W", 1, 0))) 
+```
+
 
 top5 <- contributions_per_party %>% 
   group_by(cand_party_affiliation) %>% 
@@ -43,4 +69,4 @@ house_elections %>%
   group_by(party) %>%
   summarise(N = n_distinct(fec_id)) %>%
   arrange(desc(N))
-```
+
