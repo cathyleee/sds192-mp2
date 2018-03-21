@@ -15,10 +15,12 @@ load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
 ```
+
 ```{r}
 # Join the contributions and candidates tables by cand_id
 contributions_per_party <- contributions %>% 
   inner_join(candidates, by = "cand_id") %>%
+  filter(cand_election_yr == 2011 | cand_election_yr == 2012) %>%
   select(cand_party_affiliation, cand_id, transaction_amt)
 
 top5 <- contributions_per_party %>% 
@@ -30,7 +32,7 @@ top5 <- contributions_per_party %>%
 transactions_per_party <- contributions_per_party %>% 
   filter(cand_party_affiliation == c(top5$cand_party_affiliation)) %>%
   group_by(cand_party_affiliation) %>%
-  summarise(num_can = n_distinct(), 
+  summarise(num_can = n_distinct(cand_id), 
             total_transactions = sum(transaction_amt),
             avg_transactions = mean(transaction_amt)) %>%
   arrange(desc(avg_transactions))
@@ -39,6 +41,6 @@ transactions_per_party
 
 house_elections %>% 
   group_by(party) %>%
-  summarise(N = n_distinct(candidate_name)) %>%
+  summarise(N = n_distinct(fec_id)) %>%
   arrange(desc(N))
 ```
