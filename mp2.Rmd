@@ -4,16 +4,17 @@ author: "Your Name Here"
 date: "October 31, 2017"
 output: html_document
 ---
-## Loading the data
-
-```{r, include=FALSE}
+### Loading the data
+```{r, include = FALSE}
 library(tidyverse)
+library(RColorBrewer)
 load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
 ```
 
+### Wrangle the data
 ```{r}
 # join the contributions and candidates tables by cand_id
 contributions_2012 <- contributions %>% 
@@ -34,6 +35,17 @@ contributions_2012 <- contributions_2012 %>%
 nrow(contributions_2012)
 ```
 
+### Make the first data graphic about the relationship between amount of advocating donations received and number of votes received
+```{r}
+plot1 <- contributions_2012 %>%
+  ggplot(aes(x = total_amt_per_can)) +
+  geom_line(aes(y = general_votes), col = rgb(224/255, 94/255, 135/255)) +
+  geom_line(aes(y = primary_votes), col = rgb(110/255, 158/255, 204/255)) +
+  geom_line(aes(y = runoff_votes), col = rgb(123/255, 83/255, 160/255)) 
+plot1
+```
+
+
 ```{r}
 # because one candidate can receive multiple donations
 # but only has one number of votes
@@ -45,28 +57,26 @@ contributions_2012_per_party <- contributions_2012 %>%
             mean_amt = mean(total_amt_per_can),
             total_votes = sum(general_votes), 
             mean_votes = mean(general_votes),
-            num_win = sum(ifelse(ge_winner == "W", 1, 0))) 
+            num_win = sum(ifelse(ge_winner == "W", 1, 0))) %>%
+  arrange(desc(total_votes))
 ```
 
+## Make data graphic
+```{r, warning = FALSE}
+plot2 <- contributions_2012_per_party %>%
+  ggplot(aes(x = reorder(party, -total_votes))) +
+  geom_histogram(aes(y = total_votes), stat = "identity", fill = rgb(108/255, 185/255, 209/255)) +
+  geom_histogram(aes(y = total_amt), stat = "identity", fill = rgb(224/255, 132/255, 13/255), width = 0.5) +
+  scale_y_continuous(sec.axis = sec_axis(~.*1, name = "Mean transaction amount per candidate (US$)")) # ask Ben about the unit
+plot2
+```
 
-top5 <- contributions_per_party %>% 
-  group_by(cand_party_affiliation) %>% 
-  summarise(num_can = n()) %>%
-  arrange(desc(num_can)) %>%
-  head(5)
-
-transactions_per_party <- contributions_per_party %>% 
-  filter(cand_party_affiliation == c(top5$cand_party_affiliation)) %>%
-  group_by(cand_party_affiliation) %>%
-  summarise(num_can = n_distinct(cand_id), 
-            total_transactions = sum(transaction_amt),
-            avg_transactions = mean(transaction_amt)) %>%
-  arrange(desc(avg_transactions))
-
-transactions_per_party
-
-house_elections %>% 
-  group_by(party) %>%
-  summarise(N = n_distinct(fec_id)) %>%
-  arrange(desc(N))
-
+```{r, warning = FALSE}
+contributions_2012_per_party %>% arrange(desc(mean_votes))
+plot3 <- contributions_2012_per_party %>%
+  ggplot(aes(x = reorder(party, -mean_votes))) +
+  geom_histogram(aes(y = mean_votes), stat = "identity", fill = rgb(108/255, 185/255, 209/255)) +
+  geom_histogram(aes(y = mean_amt), stat = "identity", fill = rgb(224/255, 132/255, 13/255), width = 0.5) +
+  scale_y_continuous(sec.axis = sec_axis(~.*1, name = "Mean transaction amount per candidate (US$)")) # ask Ben about the unit
+plot3
+```
