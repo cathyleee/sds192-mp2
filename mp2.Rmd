@@ -1,8 +1,10 @@
 ---
 title: "Mini-Project 2"
-author: "Your Name Here"
-date: "October 31, 2017"
-output: html_document
+author: "Ha Cao and Cathy Lee"
+date: "October 20, 2018"
+output:
+  html_document:
+    code_folding: hide
 ---
 ### Loading the data
 ```{r, include = FALSE}
@@ -25,7 +27,6 @@ contributions_2012 <- contributions %>%
   group_by(cand_id) %>%
   summarize(N = n(),
             total_amt_per_can = sum(transaction_amt))
-nrow(contributions_2012)
 ```
 
 ```{r}
@@ -35,16 +36,34 @@ contributions_2012 <- contributions_2012 %>%
 nrow(contributions_2012)
 ```
 
-### Make the first data graphic about the relationship between amount of advocating donations received and number of votes received
 ```{r}
-plot1 <- contributions_2012 %>%
-  ggplot(aes(x = total_amt_per_can)) +
-  geom_line(aes(y = general_votes), col = rgb(224/255, 94/255, 135/255)) +
-  geom_line(aes(y = primary_votes), col = rgb(110/255, 158/255, 204/255)) +
-  geom_line(aes(y = runoff_votes), col = rgb(123/255, 83/255, 160/255)) 
-plot1
+# calculate the total number of votes for each kind of votes
+total_ge <- sum(contributions_2012$general_votes)
+total_primary <- sum(contributions_2012$primary_votes)
+total_runoff <- sum(contributions_2012$runoff_votes)
+# calculate the percentage of votes each candidate has
+contributions_2012_vote_percent <- contributions_2012 %>%
+  mutate(ge_percent = general_votes/total_ge,
+         primary_percent = primary_votes/total_primary,
+         runoff_percent = runoff_votes/total_runoff)
 ```
 
+### Make the first data graphic about the relationship between amount of advocating donations received and number of votes received
+```{r}
+# write a function to draw a graph for a given y variable (specifically different kinds of votes), 
+# with x variable as total amount of advocating donations received by each candidate
+draw_vote_graph <- function(y_var, color){
+  contributions_2012_vote_percent %>% ggplot(aes(x = total_amt_per_can)) +
+    geom_line(aes(y = y_var), col = color)  
+}
+```
+
+```{r}
+# call function to draw graphs for each kind of votes
+draw_vote_graph(contributions_2012_vote_percent$ge_percent, rgb(224/255, 94/255, 135/255))
+draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 158/255, 204/255))
+draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255))
+```
 
 ```{r}
 # because one candidate can receive multiple donations
@@ -63,20 +82,13 @@ contributions_2012_per_party <- contributions_2012 %>%
 
 ## Make data graphic
 ```{r, warning = FALSE}
-plot2 <- contributions_2012_per_party %>%
+contributions_2012_per_party %>%
   ggplot(aes(x = reorder(party, -total_votes))) +
-  geom_histogram(aes(y = total_votes), stat = "identity", fill = rgb(108/255, 185/255, 209/255)) +
-  geom_histogram(aes(y = total_amt), stat = "identity", fill = rgb(224/255, 132/255, 13/255), width = 0.5) +
-  scale_y_continuous(sec.axis = sec_axis(~.*1, name = "Mean transaction amount per candidate (US$)")) # ask Ben about the unit
-plot2
+  geom_bar(aes(y = total_votes), stat = "identity", fill = rgb(108/255, 185/255, 209/255)) 
 ```
 
-```{r, warning = FALSE}
-contributions_2012_per_party %>% arrange(desc(mean_votes))
-plot3 <- contributions_2012_per_party %>%
-  ggplot(aes(x = reorder(party, -mean_votes))) +
-  geom_histogram(aes(y = mean_votes), stat = "identity", fill = rgb(108/255, 185/255, 209/255)) +
-  geom_histogram(aes(y = mean_amt), stat = "identity", fill = rgb(224/255, 132/255, 13/255), width = 0.5) +
-  scale_y_continuous(sec.axis = sec_axis(~.*1, name = "Mean transaction amount per candidate (US$)")) # ask Ben about the unit
-plot3
+```{r}
+contributions_2012_per_party %>%
+  ggplot(aes(x = reorder(party, -total_votes))) +
+  geom_bar(aes(y = total_amt), stat = "identity", fill = rgb(224/255, 132/255, 13/255)) 
 ```
