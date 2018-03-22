@@ -1,5 +1,5 @@
 ---
-title: "Mini-Project 2"
+title: "Mini Project 2: Data "
 author: "Ha Cao and Cathy Lee"
 date: "October 20, 2018"
 output:
@@ -26,14 +26,13 @@ contributions_2012 <- contributions %>%
   select(cand_party_affiliation, cand_id, transaction_amt, other_id) %>%
   group_by(cand_id) %>%
   summarize(N = n(),
-            total_amt_per_can = sum(transaction_amt))
+            total_amt_per_can = sum(transaction_amt), cand_party = cand_party_affiliation)
 ```
 
 ```{r}
 # join contributions_2012 and house_elections tables by fec_id = cand_id
 contributions_2012 <- contributions_2012 %>%
   inner_join(house_elections, by = c("cand_id" = "fec_id"))
-nrow(contributions_2012)
 ```
 
 ```{r}
@@ -84,7 +83,10 @@ contributions_2012_per_party <- contributions_2012 %>%
 ```{r, warning = FALSE}
 contributions_2012_per_party %>%
   ggplot(aes(x = reorder(party, -total_votes))) +
-  geom_bar(aes(y = total_votes), stat = "identity", fill = rgb(108/255, 185/255, 209/255)) 
+  geom_bar(aes(y = total_votes), stat = "identity", fill = rgb(108/255, 185/255, 209/255)) +
+  theme(axis.text.x = element_text(face = "bold", size = 14)) +
+  theme(axis.text.y = element_text(face = "bold", size = 12)) +
+  scale_x_discrete(labels = c("R" = "Republican", "D" = "Democratic", "U" = "Unknown", "L" = "Libertarian", "I" = "Independent")) # leave "W" and "N" as is because we don't know for sure what they stand for 
 ```
 
 ```{r}
