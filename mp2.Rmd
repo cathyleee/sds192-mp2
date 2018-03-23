@@ -16,6 +16,7 @@ load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
+library(kableExtra)
 ```
 
 ### Wrangle the data
@@ -73,7 +74,7 @@ draw_vote_graph <- function(y_var, color, graph_title){
           axis.text.y = element_text(face = "bold", size = 12), 
           axis.title.x = element_text(face = "bold", size = 13), 
           axis.title.y = element_text(face = "bold", size = 13),
-          plot.title = element_text(face = "bold", size = 15)) + 
+          plot.title = element_text(face = "bold", size = 13)) + 
     scale_x_continuous(name = "Amount of advocating money received per candidate ($)", labels = scales::comma) +
     scale_y_continuous(name = "Percentage of votes per candidate", labels = scales::percent) 
 }
@@ -81,9 +82,9 @@ draw_vote_graph <- function(y_var, color, graph_title){
 
 ```{r}
 # call function to draw graphs for each kind of votes
-draw_vote_graph(contributions_2012_vote_percent$ge_percent, rgb(224/255, 94/255, 135/255), "Percentage of general votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
-draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 158/255, 204/255), "Percentage of primary votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
-draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255), "Percentage of runoff votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
+draw_vote_graph(contributions_2012_vote_percent$ge_percent, rgb(224/255, 94/255, 135/255), "Percentage of general votes received by each candidate across all amounts of advocating donations")
+draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 158/255, 204/255), "Percentage of primary votes received by each candidate across all amounts of advocating donations")
+draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255), "Percentage of runoff votes received by each candidate across all amounts of advocating donations")
 ```
 
 Surprisingly, all 3 graphs show a general downward trend. The more money candidates received, the fewer votes they received, in all kinds of votes, across all parties, contrary to popular belief. Despite the general downward trend, there are large fluctuations in the data, indicating that the relationship between donation amounts and votes received varies significantly. Upon further research, we discovered that many candidates tended to invest the most money in the closest races, while sacrificing the races that they knew they were going to lose. This explanation could account for the low percentages of votes garnered despite large amounts of money spent, and the sharp fluctuations in vote percentages at smaller amounts of money spent - candidates could have given up on the race entirely if they knew they were going to lose, and hence not earn many votes. On the other hand, if the race was a certain win for them, they would not have to spend any money to gain a high percentage of votes. 
@@ -127,4 +128,6 @@ draw_total(contributions_2012_per_party$total_votes, rgb(108/255, 185/255, 209/2
 draw_total(contributions_2012_per_party$num_win, rgb(22/255, 199/255, 102/255), "Total number of wins", "Total number of wins per party in house elections in 2012")
 ```
 
-We drew bar graphs in a descending order of y-axis. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins, overwhelming more than any other party. Republicans outdid Democrats in all three aspects in house elections in 2012. The gap in amount of money seems to be much wider than the gaps in numbers of votes and wins.  
+We drew bar graphs in a descending order of y-axis. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins, overwhelming more than any other party. Republicans outdid Democrats in all three aspects in house elections in 2012. The gap in amount of money seems to be much wider than the gaps in numbers of votes and wins.
+
+[^footnote]: https://github.com/cathyleee/sds192-mp2
