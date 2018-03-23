@@ -103,7 +103,7 @@ contributions_2012_per_party <- contributions_2012 %>%
   arrange(desc(total_votes))
 ```
 
-## Draw data graphics to show the total amount of advocating donations and number of votes each party received in house elections in 2012
+### Data graphics showing the total amount of advocating donations and number of votes each party received in house elections in 2012
 ```{r, warning = FALSE}
 draw_total <- function(y_variable, color, y_title, graph_title){
   contributions_2012_per_party %>%
@@ -127,4 +127,9 @@ draw_total(contributions_2012_per_party$total_votes, rgb(108/255, 185/255, 209/2
 draw_total(contributions_2012_per_party$num_win, rgb(22/255, 199/255, 102/255), "Total number of wins", "Total number of wins per party in house elections in 2012")
 ```
 
-We drew bar graphs in a descending order of y-axis. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins, overwhelming more than any other party. Republicans outdid Democrats in all three aspects in house elections in 2012. The gap in amount of money seems to be much wider than the gaps in numbers of votes and wins.  
+We drew bar graphs in a descending order of y-axis. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins, overwhelming more than any other party. Republicans outdid Democrats in all three aspects in house elections in 2012. Looking more closely, however, we see that Republicans received significantly more donations than Democrats, but only slightly more votes, indicating that more money invested does not necessarily lead to more votes.
+
+From the data, we can infer that spending money during an election does not always translate to a win for the candidate; in fact, the general downward trend in the first set of graphs indicates that candidates who spend more money tend to garner less votes.
+
+### References 
+Bump, Philip. "Does More Campaign Money Actually Buy More Votes: An Investigation." *The Atlantic*, Atlantic Media Company, November 11, 2013. Retrieved from: https://www.theatlantic.com/politics/archive/2013/11/does-more-campaign-money-actually-buy-more-votes-investigation/355154/ on March 22, 2018.
