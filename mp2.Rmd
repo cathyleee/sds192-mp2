@@ -18,11 +18,13 @@ load("committees.rda")
 load("contributions.rda")
 ```
 
+Please visit our Github repo for more details on our project [^github].
+
 ### Wrangle the data
 
-Using data from the `contributions`, `candidates`, and `house_elections` tables, we investigated the relationship between the amount of donations, and subsequently number of votes, each candidate received. Our hypothesis was that the greater the donation given, the greater the number votes received by each candidate would be, since the money could be used for public relations purposes to win public favour and garner votes for the candidate. We decided to extend our objective by also taking into account the candidates’ political affiliations, and whether or not they consequently won the general election.
+Using data from the `contributions`, `candidates`, and `house_elections` tables, we investigated the relationship between the amount of donations, and subsequently number of votes, each candidate received in the house elections in 2012. Our hypothesis was that the greater the donation given, the greater the number votes received by each candidate would be, since the money could be used for public relations purposes to win public favour and garner votes for the candidate. We decided to extend our objective by also taking into account the candidates’ political affiliations, and how the parties performed in the house elections in general.
 
-In order to wrangle the data needed to prove this hypothesis, we joined the `contributions` and `candidates` tables by `cand_id`, since the candidate ID was the common factor in retrieving the amount of donations received by each candidate (from `contributions`) and the candidates’ political affiliations (from `candidates`). We filtered the data to only show results from 2012 (since `house_elections` only contains data from 2012), and to only contain donations advocating the candidate (since donations opposing the candidate would only harm their campaign). 
+To wrangle the data needed to test this hypothesis, we joined the `contributions` and `candidates` tables by `cand_id`, since the candidate ID was the common factor in retrieving the amount of donations received by each candidate (from `contributions`) and the candidates’ political affiliations (from `candidates`). We filtered the data to only show results from 2012 (since `house_elections` only contains data from 2012), and to only contain donations advocating the candidate (since donations opposing the candidate would only harm their campaign). 
 
 ```{r}
 # join the contributions and candidates tables by cand_id
@@ -36,7 +38,7 @@ contributions_2012 <- contributions %>%
             total_amt_per_can = sum(transaction_amt))
 ```
 
-We joined the new table, `contributions_2012`, with `house_elections`, again by the candidate ID, since it is the common factor between all tables.
+We joined the new table, `contributions_2012`, with `house_elections`, again by the candidate ID (aka FEC ID in `house_elections` table), since it is the common factor between all tables.
 
 ```{r}
 # join contributions_2012 and house_elections tables by fec_id = cand_id
@@ -73,7 +75,7 @@ draw_vote_graph <- function(y_var, color, graph_title){
           axis.text.y = element_text(face = "bold", size = 12), 
           axis.title.x = element_text(face = "bold", size = 13), 
           axis.title.y = element_text(face = "bold", size = 13),
-          plot.title = element_text(face = "bold", size = 15)) + 
+          plot.title = element_text(face = "bold", size = 13)) + 
     scale_x_continuous(name = "Amount of advocating money received per candidate ($)", labels = scales::comma) +
     scale_y_continuous(name = "Percentage of votes per candidate", labels = scales::percent) 
 }
@@ -81,12 +83,12 @@ draw_vote_graph <- function(y_var, color, graph_title){
 
 ```{r}
 # call function to draw graphs for each kind of votes
-draw_vote_graph(contributions_2012_vote_percent$ge_percent, rgb(224/255, 94/255, 135/255), "Percentage of general votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
-draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 158/255, 204/255), "Percentage of primary votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
-draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255), "Percentage of runoff votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
+draw_vote_graph(contributions_2012_vote_percent$ge_percent, rgb(224/255, 94/255, 135/255), "Percentage of general votes received by each candidate across all amounts of advocating donations")
+draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 158/255, 204/255), "Percentage of primary votes received by each candidate across all amounts of advocating donations")
+draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255), "Percentage of runoff votes received by each candidate across all amounts of advocating donations")
 ```
 
-Surprisingly, all 3 graphs show a general downward trend. The more money candidates received, the fewer votes they received, in all kinds of votes, across all parties, contrary to popular belief. Despite the general downward trend, there are large fluctuations in the data, indicating that the relationship between donation amounts and votes received varies significantly. Upon further research, we discovered that many candidates tended to invest the most money in the closest races, while sacrificing the races that they knew they were going to lose. This explanation could account for the low percentages of votes garnered despite large amounts of money spent, and the sharp fluctuations in vote percentages at smaller amounts of money spent - candidates could have given up on the race entirely if they knew they were going to lose, and hence not earn many votes. On the other hand, if the race was a certain win for them, they would not have to spend any money to gain a high percentage of votes. 
+**Surprisingly**, all 3 graphs show a general downward trend. The more money candidates received, the fewer votes they received, in all kinds of votes, across all parties, contrary to popular belief. Despite the general downward trend, there are large fluctuations in the data, indicating that the relationship between donation amounts and votes received varies significantly. Upon further research, we discovered that many candidates tended to invest the most money in the closest races, while sacrificing the races that they knew they were going to lose. This explanation could account for the low percentages of votes garnered despite large amounts of money spent, and the sharp fluctuations in vote percentages at smaller amounts of money spent - candidates could have given up on the race entirely if they knew they were going to lose, and hence not earn many votes. On the other hand, if the race was a certain win for them, they would not have to spend any money to gain a high percentage of votes. 
 
 Next, we wanted to find out how many votes each party got, how much money it received, and how many wins it had in total as well to compare them against each other and see if the three bar graphs show similar patterns.
 
@@ -133,3 +135,5 @@ From the data, we can infer that spending money during an election does not alwa
 
 ### References 
 Bump, Philip. "Does More Campaign Money Actually Buy More Votes: An Investigation." *The Atlantic*, Atlantic Media Company, November 11, 2013. Retrieved from: https://www.theatlantic.com/politics/archive/2013/11/does-more-campaign-money-actually-buy-more-votes-investigation/355154/ on March 22, 2018.
+
+[^github]: https://github.com/cathyleee/sds192-mp2
