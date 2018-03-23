@@ -1,5 +1,5 @@
 ---
-title: "Mini Project 2: Data "
+title: "Mini Project 2: Data Wrangling"
 author: "Ha Cao and Cathy Lee"
 date: "March 20, 2018"
 output:
@@ -7,8 +7,9 @@ output:
     code_folding: hide
     theme: cerulean
 ---
-### Loading the data
-```{r, include = FALSE}
+
+### Load the data
+```{r message=FALSE}
 library(tidyverse)
 library(RColorBrewer)
 load("house_elections.rda")
@@ -19,7 +20,10 @@ load("contributions.rda")
 
 ### Wrangle the data
 
-We are interested to know whether there is any relationship between the advocating donations a candidate received and the number of votes they got in the house elections in 2012. It makes sense to hypothesize that advocating money may increase the chance of getting more votes as money can be used for public relations purposes to boost the popularity of the candidate. Therefore, we join `contributions` and `candidates` tables, and then join the resulting table with `house_elections`. We filter just the "24E" type of transaction, which is the money donated in favor of the candidate. 
+Using data from the `contributions`, `candidates`, and `house_elections` tables, we investigated the relationship between the amount of donations, and subsequently number of votes, each candidate received. Our hypothesis was that the greater the donation given, the greater the number votes received by each candidate would be, since the money could be used for public relations purposes to win public favour and garner votes for the candidate. We decided to extend our objective by also taking into account the candidates’ political affiliations, and whether or not they consequently won the general election.
+
+In order to wrangle the data needed to prove this hypothesis, we joined the `contributions` and `candidates` tables by `cand_id`, since the candidate ID was the common factor in retrieving the amount of donations received by each candidate (from `contributions`) and the candidates’ political affiliations (from `candidates`). We filtered the data to only show results from 2012 (since `house_elections` only contains data from 2012), and to only contain donations advocating the candidate (since donations opposing the candidate would only harm their campaign). 
+
 ```{r}
 # join the contributions and candidates tables by cand_id
 contributions_2012 <- contributions %>% 
@@ -32,11 +36,15 @@ contributions_2012 <- contributions %>%
             total_amt_per_can = sum(transaction_amt))
 ```
 
+We joined the new table, `contributions_2012`, with `house_elections`, again by the candidate ID, since it is the common factor between all tables.
+
 ```{r}
 # join contributions_2012 and house_elections tables by fec_id = cand_id
 contributions_2012 <- contributions_2012 %>%
   inner_join(house_elections, by = c("cand_id" = "fec_id"))
 ```
+
+We proceeded to calculate the percentage of votes (general, primary, and runoff) each candidate received out of the total number of votes in each category.
 
 ```{r}
 # calculate the total number of votes for each kind of votes
@@ -50,9 +58,10 @@ contributions_2012_vote_percent <- contributions_2012 %>%
          runoff_percent = runoff_votes/total_runoff)
 ```
 
-### Make data graphics about the relationship between amount of advocating donations received and number of votes received
+### Data graphics showing the relationship between amount of donations and votes received
 
-We write a function to draw a data graphic for each kind of vote: general votes, primary votes, and runoff votes. 
+With this data, we were able to examine the relationship between the amount of advocating donation received and the resulting percentage of votes by writing a function to plot a data graphic for each vote category.
+
 ```{r}
 # write a function to draw a graph for a given y variable (specifically different kinds of votes), 
 # with x variable as total amount of advocating donations received by each candidate
@@ -77,9 +86,10 @@ draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 15
 draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255), "Percentage of runoff votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
 ```
 
-*Surprisingly*, despite some fluctuations, all the graphs show similar downward trends. The more money candidates received, the fewer votes they got, in all kinds of votes, across all parties, contrary to popular belief. 
+Surprisingly, all 3 graphs show a general downward trend. The more money candidates received, the fewer votes they received, in all kinds of votes, across all parties, contrary to popular belief. Despite the general downward trend, there are large fluctuations in the data, indicating that the relationship between donation amounts and votes received varies significantly. Upon further research, we discovered that many candidates tended to invest the most money in the closest races, while sacrificing the races that they knew they were going to lose. This explanation could account for the low percentages of votes garnered despite large amounts of money spent, and the sharp fluctuations in vote percentages at smaller amounts of money spent - candidates could have given up on the race entirely if they knew they were going to lose, and hence not earn many votes. On the other hand, if the race was a certain win for them, they would not have to spend any money to gain a high percentage of votes. 
 
-Moreover, we want to know how many votes each party got, how much money it received, and how many wins it had in total as well to compare them against each other and see if the three bar graphs show similar patterns.
+Next, we wanted to find out how many votes each party got, how much money it received, and how many wins it had in total as well to compare them against each other and see if the three bar graphs show similar patterns.
+
 ```{r}
 # because one candidate can receive multiple donations
 # but only has one number of votes
@@ -117,4 +127,4 @@ draw_total(contributions_2012_per_party$total_votes, rgb(108/255, 185/255, 209/2
 draw_total(contributions_2012_per_party$num_win, rgb(22/255, 199/255, 102/255), "Total number of wins", "Total number of wins per party in house elections in 2012")
 ```
 
-We draw bar graphs in a descending order of y-axis. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins, overwhelming more than any other party. Republican outdid Democratic in all three aspects in house elections in 2012. The gap in amount of money seems to be much wider than the gaps in numbers of votes and wins.  
+We drew bar graphs in a descending order of y-axis. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins, overwhelming more than any other party. Republicans outdid Democrats in all three aspects in house elections in 2012. The gap in amount of money seems to be much wider than the gaps in numbers of votes and wins.  
