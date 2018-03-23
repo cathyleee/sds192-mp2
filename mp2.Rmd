@@ -26,7 +26,7 @@ contributions_2012 <- contributions %>%
   select(cand_party_affiliation, cand_id, transaction_amt, other_id) %>%
   group_by(cand_id) %>%
   summarize(N = n(),
-            total_amt_per_can = sum(transaction_amt), cand_party = cand_party_affiliation)
+            total_amt_per_can = sum(transaction_amt))
 ```
 
 ```{r}
@@ -51,17 +51,25 @@ contributions_2012_vote_percent <- contributions_2012 %>%
 ```{r}
 # write a function to draw a graph for a given y variable (specifically different kinds of votes), 
 # with x variable as total amount of advocating donations received by each candidate
-draw_vote_graph <- function(y_var, color){
+draw_vote_graph <- function(y_var, color, graph_title){
   contributions_2012_vote_percent %>% ggplot(aes(x = total_amt_per_can)) +
-    geom_line(aes(y = y_var), col = color)  
+    geom_line(aes(y = y_var), col = color) +
+    labs(title = graph_title) +
+    theme(axis.text.x = element_text(face = "bold", size = 12), 
+          axis.text.y = element_text(face = "bold", size = 12), 
+          axis.title.x = element_text(face = "bold", size = 13), 
+          axis.title.y = element_text(face = "bold", size = 13),
+          plot.title = element_text(face = "bold", size = 15)) + 
+    scale_x_continuous(name = "Amount of advocating money received per candidate ($)", labels = scales::comma) +
+    scale_y_continuous(name = "Percentage of votes per candidate", labels = scales::percent) 
 }
 ```
 
 ```{r}
 # call function to draw graphs for each kind of votes
-draw_vote_graph(contributions_2012_vote_percent$ge_percent, rgb(224/255, 94/255, 135/255))
-draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 158/255, 204/255))
-draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255))
+draw_vote_graph(contributions_2012_vote_percent$ge_percent, rgb(224/255, 94/255, 135/255), "Percentage of general votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
+draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 158/255, 204/255), "Percentage of primary votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
+draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255), "Percentage of runoff votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
 ```
 
 ```{r}
@@ -79,18 +87,26 @@ contributions_2012_per_party <- contributions_2012 %>%
   arrange(desc(total_votes))
 ```
 
-## Make data graphic
+## Draw data graphics to show the total amount of advocating donations and number of votes each party received in house elections in 2012
+We want to know how much advocating money and how many votes each party received in house elections in 2012 to compare them against each other and see ifthe two bar graphs show similar patterns.
 ```{r, warning = FALSE}
-contributions_2012_per_party %>%
-  ggplot(aes(x = reorder(party, -total_votes))) +
-  geom_bar(aes(y = total_votes), stat = "identity", fill = rgb(108/255, 185/255, 209/255)) +
-  theme(axis.text.x = element_text(face = "bold", size = 14)) +
-  theme(axis.text.y = element_text(face = "bold", size = 12)) +
-  scale_x_discrete(labels = c("R" = "Republican", "D" = "Democratic", "U" = "Unknown", "L" = "Libertarian", "I" = "Independent")) # leave "W" and "N" as is because we don't know for sure what they stand for 
+draw_total <- function(y_variable, color, y_title, graph_title){
+  contributions_2012_per_party %>%
+  ggplot(aes(x = reorder(party, -y_variable))) +
+  geom_bar(aes(y = y_variable), stat = "identity", fill = color) +
+  labs(title = graph_title) +
+  theme(axis.text.x = element_text(face = "bold", size = 12, angle = 45), 
+        axis.text.y = element_text(face = "bold", size = 12), 
+        axis.title.x = element_text(face = "bold", size = 13), 
+        axis.title.y = element_text(face = "bold", size = 13),
+        plot.title = element_text(face = "bold", size = 15)) + 
+  scale_x_discrete(name = "Party", labels = c("R" = "Republican", "D" = "Democratic", "U" = "Unknown", "L" = "Libertarian", "I" = "Independent", "N" = "Nullifer", "W" = "Whig")) +
+  scale_y_continuous(name = y_title, labels = scales::comma)  
+}
 ```
 
 ```{r}
-contributions_2012_per_party %>%
-  ggplot(aes(x = reorder(party, -total_votes))) +
-  geom_bar(aes(y = total_amt), stat = "identity", fill = rgb(224/255, 132/255, 13/255)) 
+# call function to draw graphs for total amount of money and total number of votes
+draw_total(contributions_2012_per_party$total_amt, rgb(224/255, 132/255, 13/255), "Total amount of money received ($)", "Total amount of money per party in house elections in 2012")
+draw_total(contributions_2012_per_party$total_votes, rgb(108/255, 185/255, 209/255), "Total number of votes", "Total number of votes per party in house elections in 2012")
 ```
