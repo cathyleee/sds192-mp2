@@ -1,10 +1,11 @@
 ---
 title: "Mini Project 2: Data "
 author: "Ha Cao and Cathy Lee"
-date: "October 20, 2018"
+date: "March 20, 2018"
 output:
   html_document:
     code_folding: hide
+    theme: cerulean
 ---
 ### Loading the data
 ```{r, include = FALSE}
@@ -17,6 +18,8 @@ load("contributions.rda")
 ```
 
 ### Wrangle the data
+
+We are interested to know whether there is any relationship between the advocating donations a candidate received and the number of votes they got in the house elections in 2012. It makes sense to hypothesize that advocating money may increase the chance of getting more votes as money can be used for public relations purposes to boost the popularity of the candidate. Therefore, we join `contributions` and `candidates` tables, and then join the resulting table with `house_elections`. We filter just the "24E" type of transaction, which is the money donated in favor of the candidate. 
 ```{r}
 # join the contributions and candidates tables by cand_id
 contributions_2012 <- contributions %>% 
@@ -47,7 +50,9 @@ contributions_2012_vote_percent <- contributions_2012 %>%
          runoff_percent = runoff_votes/total_runoff)
 ```
 
-### Make the first data graphic about the relationship between amount of advocating donations received and number of votes received
+### Make data graphics about the relationship between amount of advocating donations received and number of votes received
+
+We write a function to draw a data graphic for each kind of vote: general votes, primary votes, and runoff votes. 
 ```{r}
 # write a function to draw a graph for a given y variable (specifically different kinds of votes), 
 # with x variable as total amount of advocating donations received by each candidate
@@ -72,6 +77,9 @@ draw_vote_graph(contributions_2012_vote_percent$primary_percent, rgb(110/255, 15
 draw_vote_graph(contributions_2012_vote_percent$runoff_percent, rgb(123/255, 83/255, 160/255), "Percentage of runoff votes received by each candidate across all amounts of advocating donations received in house elections in 2012")
 ```
 
+*Surprisingly*, despite some fluctuations, all the graphs show similar downward trends. The more money candidates received, the fewer votes they got, in all kinds of votes, across all parties, contrary to popular belief. 
+
+Moreover, we want to know how many votes each party got, how much money it received, and how many wins it had in total as well to compare them against each other and see if the three bar graphs show similar patterns.
 ```{r}
 # because one candidate can receive multiple donations
 # but only has one number of votes
@@ -80,15 +88,12 @@ contributions_2012_per_party <- contributions_2012 %>%
   group_by(party) %>%
   summarize(num_can = n(),
             total_amt = sum(total_amt_per_can),
-            mean_amt = mean(total_amt_per_can),
-            total_votes = sum(general_votes), 
-            mean_votes = mean(general_votes),
+            total_votes = sum(general_votes),
             num_win = sum(ifelse(ge_winner == "W", 1, 0))) %>%
   arrange(desc(total_votes))
 ```
 
 ## Draw data graphics to show the total amount of advocating donations and number of votes each party received in house elections in 2012
-We want to know how much advocating money and how many votes each party received in house elections in 2012 to compare them against each other and see ifthe two bar graphs show similar patterns.
 ```{r, warning = FALSE}
 draw_total <- function(y_variable, color, y_title, graph_title){
   contributions_2012_per_party %>%
@@ -109,4 +114,7 @@ draw_total <- function(y_variable, color, y_title, graph_title){
 # call function to draw graphs for total amount of money and total number of votes
 draw_total(contributions_2012_per_party$total_amt, rgb(224/255, 132/255, 13/255), "Total amount of money received ($)", "Total amount of money per party in house elections in 2012")
 draw_total(contributions_2012_per_party$total_votes, rgb(108/255, 185/255, 209/255), "Total number of votes", "Total number of votes per party in house elections in 2012")
+draw_total(contributions_2012_per_party$num_win, rgb(22/255, 199/255, 102/255), "Total number of wins", "Total number of wins per party in house elections in 2012")
 ```
+
+We draw bar graphs in a descending order of y-axis. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins, overwhelming more than any other party. Republican outdid Democratic in all three aspects in house elections in 2012. The gap in amount of money seems to be much wider than the gaps in numbers of votes and wins.  
