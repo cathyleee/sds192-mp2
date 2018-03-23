@@ -129,7 +129,7 @@ draw_total(contributions_2012_per_party$total_votes, rgb(108/255, 185/255, 209/2
 draw_total(contributions_2012_per_party$num_win, rgb(22/255, 199/255, 102/255), "Total number of wins", "Total number of wins per party in house elections in 2012")
 ```
 
-We drew bar graphs in a descending order of y-axis. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins, overwhelming more than any other party. Republicans outdid Democrats in all three aspects in house elections in 2012. Looking more closely, however, we see that Republicans received significantly more donations than Democrats, but only slightly more votes, indicating that more money invested does not necessarily lead to more votes.
+We drew bar graphs for each political party. We can see that Republican and Democratic are the two parties that account for most votes, most money, and most wins. Republicans outdid Democrats in all three aspects in house elections in 2012. Looking more closely, however, we see that Republicans received significantly more donations than Democrats, but only slightly more votes, indicating that more money invested does not necessarily lead to more votes.
 
 From the data, we can infer that spending money during an election does not always translate to a win for the candidate; in fact, the general downward trend in the first set of graphs indicates that candidates who spend more money tend to garner less votes.
 
